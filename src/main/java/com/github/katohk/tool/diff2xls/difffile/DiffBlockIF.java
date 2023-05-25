@@ -7,6 +7,9 @@ public interface DiffBlockIF {
    public String getLeftName();
    public String getRightName();
 
+   public String getLeftFullName();
+   public String getRightFullName();
+
    public DiffLine getLeftDiffLine();
    public DiffLine getRightDiffLine();
    

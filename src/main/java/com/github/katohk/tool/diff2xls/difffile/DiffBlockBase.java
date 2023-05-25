@@ -11,20 +11,20 @@ import java.util.List;
 
 public abstract class DiffBlockBase implements DiffBlockIF {
 
-	String leftName = null;
-	String rightName = null;
+	protected List<String> leftNameField = null;
+	protected List<String> rightNameField = null;
 
-	List<String> leftBlock = new ArrayList<String>();
-	List<String> rightBlock = new ArrayList<String>();
+	protected List<String> leftBlock = new ArrayList<String>();
+	protected List<String> rightBlock = new ArrayList<String>();
 
-	BufferedReader br = null;
-	String line = null;
+	protected BufferedReader br = null;
+	protected String line = null;
 
-	final int LEFT = 1;
-	final int RIGHT = 2;
-	final int ELSE = 0;
-	int status = ELSE;
-	boolean block = false;
+	protected final int LEFT = 1;
+	protected final int RIGHT = 2;
+	protected final int ELSE = 0;
+	protected int status = ELSE;
+	protected boolean block = false;
 
 	public DiffBlockBase(Reader rd) throws IOException {
 		br = new BufferedReader(rd);
@@ -47,11 +47,19 @@ public abstract class DiffBlockBase implements DiffBlockIF {
 	}
 
 	public String getLeftName(){
-		return leftName;
+		return getFileName(leftNameField);
 	}
 
 	public String getRightName(){
-		return rightName;
+		return getFileName(rightNameField);
+	}
+
+	public String getLeftFullName(){
+		return getFullPathName(leftNameField);
+	}
+
+	public String getRightFullName(){
+		return getFullPathName(rightNameField);
 	}
 
 	public DiffLine getLeftDiffLine(){
@@ -68,32 +76,55 @@ public abstract class DiffBlockBase implements DiffBlockIF {
 		list.add(line);
 	}
 
-	protected String getNameField(String line){
-
-		StringBuffer name = new StringBuffer();
-		int word = 0;
-		for(int i=0; i < line.length(); i++){
-			char ch = line.charAt(i);
-			if ( ch == ' ' || ch == '\t' ){
-				word++;
-				if ( word == 2 ){
-					break;
-				}
-			}else{
-				if ( word == 1 ){
-					if ( ch == '/' || ch == '\\' ){
-						name = new StringBuffer();
-					} else{
-						name.append(ch);
-					}
-				}
-			}
-		}
-		return name.toString();
-	}
-
-
 	public boolean isEmpty() {
 		return (leftBlock.isEmpty() && rightBlock.isEmpty());
+	}
+
+	public String getFullPathName(List<String> nameField) {
+		return String.join("/", nameField);
+	}
+	
+	protected String getFileName(List<String> nameField) {
+		int size = nameField.size();
+		if ( size > 0 ) {
+			return nameField.get(size - 1);
+		}
+		return "";
+	}
+
+	protected List<String> getNameField(String line){
+
+		List<String> pathList = new ArrayList<>();
+		StringBuilder name = new StringBuilder();
+		int word = 0;
+		boolean quote = false;
+		for(int i=0; i < line.length(); i++){
+			char ch = line.charAt(i);
+			
+			if ( ch == '"' ) {
+				quote = quote ? false : true;
+				continue;
+			}
+			
+			if ( quote == false ) {
+				if ( ch == ' ' || ch == '\t' ){
+					word++;
+				}
+			}
+
+			if ( word == 1 ) {
+				if ( ch == '/' || ch == '\\' ){
+					pathList.add(name.toString());
+					name.setLength(0);
+				}else {
+					name.append(ch);
+				}
+			} else if ( word == 2 ) {
+				break;
+			}
+		}
+
+		pathList.add(name.toString());
+		return pathList;
 	}
 }

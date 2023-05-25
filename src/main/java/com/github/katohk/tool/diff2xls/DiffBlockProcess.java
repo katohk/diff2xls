@@ -72,10 +72,14 @@ class DiffBlockProcess{
             ds.done();
         }
         ds = book.makeDiffSheet(getSheetName());
+        ds.setFileName(diffBlock.getLeftFullName());
+
     }
 
     // end of block
     protected void procEOB(){
+        ds.setCurSeq();
+
         switch (mode){
         case 1:
             procEOB1();
@@ -92,8 +96,6 @@ class DiffBlockProcess{
     // mode = 1
     //
     private void procEOB1(){
-        ds.setCurSeq();
-
         // left cell
         procCell1(diffBlock.getLeftDiffLine(), MAXROW, DiffSheet.LEFT);
         // right cell
@@ -126,8 +128,6 @@ class DiffBlockProcess{
     // mode = 2
     //
     private void procEOB2(){
-        ds.setCurSeq();
-
         // left cell
         procCell2(diffBlock.getLeftDiffLine(), DiffSheet.LEFT);
         // right cell
@@ -148,8 +148,6 @@ class DiffBlockProcess{
     // mode = 3
     //
     private void procEOB3(){
-
-        ds.setCurSeq();
 
         DiffLine left = diffBlock.getLeftDiffLine();
         DiffLine right = diffBlock.getRightDiffLine();
@@ -176,13 +174,15 @@ class DiffBlockProcess{
             name = name.substring(0,24) + "...";
         }
         
-        Integer n = sheetNames.get(name);
+        String name2 = name.toUpperCase();
+        
+        Integer n = sheetNames.get(name2);
         if ( n == null ){
-            sheetNames.put(name, 1);
+            sheetNames.put(name2, 1);
             return name;
         }else{
             int nn = n.intValue() + 1;
-            sheetNames.put(name, nn);
+            sheetNames.put(name2, nn);
             name = name + "(" + Integer.toString(nn) + ")";
             return name;
         }

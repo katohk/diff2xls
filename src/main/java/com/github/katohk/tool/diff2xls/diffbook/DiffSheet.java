@@ -125,6 +125,12 @@ public class DiffSheet {
 
         return rowNum;
     }
+    
+    public void setFileName(String fileName) {
+    	XSSFRow row = sheet.createRow(0);
+    	XSSFCell cell = row.createCell(0);
+    	cell.setCellValue(fileName);
+    }
 
     public void setCellValue(XSSFCell cell, String line){
         cell.setCellValue( line );

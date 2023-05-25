@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.katohk.tool.diff2xls</groupId>
   <artifactId>diff2xls</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
 
   	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->

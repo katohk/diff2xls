@@ -59,8 +59,8 @@ public class ContextDiffBlock extends DiffBlockBase{
 				// left block
 				if ( block == false ){
 					// set filename
-					leftName = getNameField(line);
-					System.out.println(leftName);
+					leftNameField = getNameField(line);
+					System.out.println(getFileName(leftNameField));
 				}else{ 
 					status = LEFT;
 					addLine(leftBlock,line);
@@ -70,7 +70,7 @@ public class ContextDiffBlock extends DiffBlockBase{
 				// right block
 				if ( block == false ){
 					// set filename
-					rightName = getNameField(line);
+					rightNameField = getNameField(line);
 				}else{
 					status = RIGHT;
 					addLine(rightBlock,line);

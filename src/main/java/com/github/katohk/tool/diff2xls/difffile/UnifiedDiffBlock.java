@@ -59,13 +59,13 @@ public class UnifiedDiffBlock extends DiffBlockBase {
 			}else if ( line.indexOf("--- ") == 0 ){
 				seq = 0;
 				// set filename
-				leftName = getNameField(line);
-				System.out.println(leftName);
+				leftNameField = getNameField(line);
+				System.out.println(getFileName(leftNameField));
 				return DiffBlockState.SOE;
 
 			}else if ( line.indexOf("+++ ") == 0 ){
 				// set filename
-				rightName = getNameField(line);
+				rightNameField = getNameField(line);
 
 			}else if ( ch == '-' ) {
 				addLine(leftBlock,line);

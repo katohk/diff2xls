@@ -71,8 +71,10 @@ class DiffBlockProcess{
         if ( ds != null ){
             ds.done();
         }
-        ds = book.makeDiffSheet(getSheetName());
-        ds.setFileName(diffBlock.getLeftFullName());
+        
+        String pathName = diffBlock.getLeftFullName();
+        ds = book.makeDiffSheet(getSheetName(),pathName);
+        ds.setFileName(pathName);
 
     }
 

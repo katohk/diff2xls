@@ -29,6 +29,7 @@ public class DiffSheet {
     DiffSheet(DiffBook book, XSSFSheet sheet) {
         this.diffbook = book;
         this.sheet = sheet;
+        this.diffTemplate = diffbook.getTemplate();
     }
 
     public XSSFCell getNextCell(char rlflag){
@@ -83,7 +84,7 @@ public class DiffSheet {
     }
 
     /**
-     * Describe <code>done</code> method here.
+     * End processing for the sheet.
      *
      */
     public void done(){
@@ -101,15 +102,14 @@ public class DiffSheet {
     }
 
     /**
-     * Describe <code>setCurSeq</code> method here.
+     * set the sequence number.
      *
-     * @return an <code>int</code> value
+     * @return row number
      */
     public int setCurSeq(){
 
         int rowNum;
         if ( seqNum == 0 ){
-            diffTemplate = diffbook.getTemplate();
             rowNum = diffTemplate.getRowNum();
             curRowNum = rowNum;
             leftRowNum = rowNum;
@@ -127,9 +127,9 @@ public class DiffSheet {
     }
     
     public void setFileName(String fileName) {
-    	XSSFRow row = sheet.createRow(0);
-    	XSSFCell cell = row.createCell(0);
+    	XSSFCell cell = sheet.getRow(0).createCell(0);
     	cell.setCellValue(fileName);
+    	cell.setCellStyle(diffTemplate.getFileNameStyle());
     }
 
     public void setCellValue(XSSFCell cell, String line){

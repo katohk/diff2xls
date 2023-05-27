@@ -1,7 +1,7 @@
 package com.github.katohk.tool.diff2xls.diffbook;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -31,19 +31,16 @@ class DiffTemplate {
     private XSSFCellStyle deleteStyle = null;
     */
 
-    private List<XSSFCellStyle> changeStyle = new ArrayList<XSSFCellStyle>(5);
-    private List<XSSFCellStyle> addStyle = new ArrayList<XSSFCellStyle>(5);
-    private List<XSSFCellStyle> deleteStyle = new ArrayList<XSSFCellStyle>(5);
+    private Map<Integer,XSSFCellStyle> changeStyle = new HashMap<>();
+    private Map<Integer,XSSFCellStyle> addStyle = new HashMap<>();
+    private Map<Integer,XSSFCellStyle> deleteStyle = new HashMap<>();
+    
+    private XSSFCellStyle fileNameStyle;
 
     /**
      * Creates a new <code>DiffTemplate</code> instance.
      */
     DiffTemplate(){
-        for(int i=0; i<5; i++){
-            changeStyle.add(null);
-            addStyle.add(null);
-            deleteStyle.add(null);
-        }
     }
    
     /**
@@ -190,7 +187,7 @@ class DiffTemplate {
      * @param argChangeStyle Value to assign to this.changeStyle
      */
     public void setChangeStyle(XSSFCellStyle argChangeStyle, int index) {
-        this.changeStyle.set(index, argChangeStyle);
+        this.changeStyle.put(index, argChangeStyle);
     }
 
     /**
@@ -208,7 +205,7 @@ class DiffTemplate {
      * @param argAddStyle Value to assign to this.addStyle
      */
     public void setAddStyle(XSSFCellStyle argAddStyle, int index) {
-        this.addStyle.set(index, argAddStyle);
+        this.addStyle.put(index, argAddStyle);
     }
 
     /**
@@ -226,7 +223,14 @@ class DiffTemplate {
      * @param argDeleteStyle Value to assign to this.deleteStyle
      */
     public void setDeleteStyle(XSSFCellStyle argDeleteStyle, int index) {
-        this.deleteStyle.set(index, argDeleteStyle);
+        this.deleteStyle.put(index, argDeleteStyle);
     }
 
+   public XSSFCellStyle getFileNameStyle() {
+	   return this.fileNameStyle;
+   }
+    
+   public void setFileNameStyle(XSSFCellStyle argFileNameStyle) {
+	   this.fileNameStyle = argFileNameStyle;
+   }
 }

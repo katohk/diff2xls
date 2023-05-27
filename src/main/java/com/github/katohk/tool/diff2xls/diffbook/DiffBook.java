@@ -5,11 +5,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
 
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.ooxml.POIXMLProperties;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFCreationHelper;
+import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -26,11 +29,22 @@ public class DiffBook {
     private String templateFname = "";
     XSSFWorkbook workbook = null;
     private int sheetindex = 0;
-
+    
     /* template info */
     private XSSFSheet tmpsheet = null;
+    
+    /** Template sheet */
     private DiffTemplate diffTemplate = null;
-
+    private String templateSheetName = "format";
+    private int templateIndex = 0;
+    
+    /** Index sheet */
+    private String indexSheetName = "Index";
+    private int indexIndex = 0;
+    private int indexRow = 0;
+    private XSSFCellStyle indexStyle = null;
+    
+    private XSSFCreationHelper creationHelper = null;
 
     /**
      * Creates a new <code>DiffBook</code> instance.
@@ -41,24 +55,49 @@ public class DiffBook {
     public DiffBook(String fname) throws IOException {
         templateFname = fname;
         workbook = getWorkbook();
+
+    	indexIndex = workbook.getSheetIndex(indexSheetName);
+        XSSFCell fileNameCell = workbook.getSheetAt(indexIndex).getRow(0).getCell(0);
+        indexStyle = fileNameCell.getCellStyle();
+    	
+    	templateIndex = workbook.getSheetIndex(templateSheetName);
+    	sheetindex = templateIndex;
+    	
+    	creationHelper = workbook.getCreationHelper();
     }
 
     /**
-     * Describe <code>makeDiffSheet</code> method here.
+     * Creates a new <code>DiffSheet</code> instance.
      *
-     * @param sname a <code>String</code> value
+     * @param sname sheet name
+     * @param pathName full path name
      * @return a <code>DiffSheet</code> value
      */
-    public DiffSheet makeDiffSheet(String sname){
-        XSSFSheet sheet = workbook.cloneSheet(0);
+    public DiffSheet makeDiffSheet(String sname, String pathName){
+        XSSFSheet sheet = workbook.cloneSheet(templateIndex);
         sheetindex++;
         try{
             workbook.setSheetName(sheetindex, sname);
+            addIndex(sname,pathName);
+
             return new DiffSheet(this, sheet);
         }catch(IllegalArgumentException ex){
             System.err.println("name="+sname);
             throw ex;
         }
+    }
+    
+    private void addIndex(String sname, String pathName) {
+    	XSSFSheet indexSheet = workbook.getSheetAt(indexIndex);
+    	XSSFCell cell = indexSheet.createRow(indexRow).createCell(0);
+
+    	XSSFHyperlink link = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
+    	link.setAddress("'" + sname + "'!A1");
+    	cell.setHyperlink(link);
+    	cell.setCellValue(pathName);
+    	cell.setCellStyle(indexStyle);
+    	
+    	indexRow++;
     }
 
     private XSSFWorkbook getWorkbook() throws IOException {
@@ -76,20 +115,24 @@ public class DiffBook {
     }
 
     /**
-     * Describe <code>write</code> method here.
+     * Write out this document to OutputStream.
      *
-     * @param fname a <code>OutputStream</code> value
+     * @param out a <code>OutputStream</code> value
      * @exception IOException if an error occurs
      */
     public void write(OutputStream out) throws IOException {
-        workbook.removeSheetAt(0); // delete template
+        workbook.removeSheetAt(templateIndex); // delete template
+        
+        POIXMLProperties properties = workbook.getProperties();
+        properties.getCoreProperties().setLastModifiedByUser("diff2xls");
+
         workbook.write(out);
     }
 
     /**
-     * Describe <code>write</code> method here.
+     * Write out this document to file path.
      *
-     * @param fname a <code>String</code> value
+     * @param fname file path.
      * @exception IOException if an error occurs
      */
     public void write(String fname) throws IOException {
@@ -107,14 +150,10 @@ public class DiffBook {
         if ( diffTemplate == null ){
             diffTemplate = new DiffTemplate();
 
-            tmpsheet = workbook.getSheetAt(0);
+            tmpsheet = workbook.getSheetAt(templateIndex);
 
-            /*
-            for ( short i = 0; i < workbook.getNumberOfFonts(); i++ ){
-                XSSFFont font = workbook.getFontAt(i);
-                System.out.println( font.toString() );
-            }
-            */
+            XSSFCell fileNameCell = tmpsheet.getRow(0).getCell(0);
+            diffTemplate.setFileNameStyle(fileNameCell.getCellStyle());
 
             Iterator<Row> rowIterator = tmpsheet.rowIterator(); 
             while(rowIterator.hasNext()){

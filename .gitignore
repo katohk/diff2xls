@@ -24,3 +24,7 @@ hs_err_pid*
 replay_pid*
 
 target/
+# Track JAR and WAR files in target/
+!target/*.jar
+!target/*.war
+!target/*.ear

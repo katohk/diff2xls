@@ -72,10 +72,26 @@ class DiffBlockProcess{
             ds.done();
         }
         
-        String pathName = diffBlock.getLeftFullName();
+        String pathName = getActualPathName();
         ds = book.makeDiffSheet(getSheetName(),pathName);
         ds.setFileName(pathName);
 
+    }
+
+    private String getActualPathName(){
+        String leftPath = diffBlock.getLeftFullName();
+        if ( "/dev/null".equals(leftPath) ){
+            return diffBlock.getRightFullName();
+        }
+        return leftPath;
+    }
+
+    private String getActualFileName(){
+        String leftPath = diffBlock.getLeftFullName();
+        if ( "/dev/null".equals(leftPath) ){
+            return diffBlock.getRightName();
+        }
+        return diffBlock.getLeftName();
     }
 
     // end of block
@@ -170,7 +186,7 @@ class DiffBlockProcess{
     }
 
     private String getSheetName(){
-        String name = diffBlock.getLeftName();
+        String name = getActualFileName();
 
         if ( name.length() > 27 ) {
             name = name.substring(0,24) + "...";

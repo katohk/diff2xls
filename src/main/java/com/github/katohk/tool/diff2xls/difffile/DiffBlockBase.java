@@ -98,6 +98,7 @@ public abstract class DiffBlockBase implements DiffBlockIF {
 		StringBuilder name = new StringBuilder();
 		int word = 0;
 		boolean quote = false;
+		boolean isAbsolutePath = false;
 		for(int i=0; i < line.length(); i++){
 			char ch = line.charAt(i);
 			
@@ -109,12 +110,19 @@ public abstract class DiffBlockBase implements DiffBlockIF {
 			if ( quote == false ) {
 				if ( ch == ' ' || ch == '\t' ){
 					word++;
+					continue;
 				}
 			}
 
 			if ( word == 1 ) {
 				if ( ch == '/' || ch == '\\' ){
-					pathList.add(name.toString());
+					String segment = name.toString();
+					if (!segment.isEmpty()) {
+						pathList.add(segment);
+					} else if (pathList.isEmpty()) {
+						// Mark as absolute path if first segment is empty
+						isAbsolutePath = true;
+					}
 					name.setLength(0);
 				}else {
 					name.append(ch);
@@ -125,6 +133,20 @@ public abstract class DiffBlockBase implements DiffBlockIF {
 		}
 
 		pathList.add(name.toString());
+		
+		// Strip 'a/' or 'b/' prefix commonly used in git diffs
+		if (pathList.size() > 0) {
+			String firstComponent = pathList.get(0);
+			if (firstComponent.equals("a") || firstComponent.equals("b")) {
+				pathList.remove(0);
+			}
+		}
+		
+		// Add leading empty string to indicate absolute path
+		if (isAbsolutePath && !pathList.isEmpty()) {
+			pathList.add(0, "");
+		}
+		
 		return pathList;
 	}
 }

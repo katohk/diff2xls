@@ -60,12 +60,17 @@ public class UnifiedDiffBlock extends DiffBlockBase {
 				seq = 0;
 				// set filename
 				leftNameField = getNameField(line);
-				System.out.println(getFileName(leftNameField));
-				return DiffBlockState.SOE;
 
 			}else if ( line.indexOf("+++ ") == 0 ){
 				// set filename
 				rightNameField = getNameField(line);
+				// Print right name if left is /dev/null
+				if (getFullPathName(leftNameField).equals("/dev/null")) {
+					System.out.println(getFileName(rightNameField));
+				} else {
+					System.out.println(getFileName(leftNameField));
+				}
+				return DiffBlockState.SOE;
 
 			}else if ( ch == '-' ) {
 				addLine(leftBlock,line);
@@ -76,6 +81,10 @@ public class UnifiedDiffBlock extends DiffBlockBase {
 			}else if ( ch == ' ' ) {
 				addLine(leftBlock,line);
 				addLine(rightBlock,line);
+
+			}else if ( ch == '\\' ) {
+				// Skip lines like "\ No newline at end of file"
+				continue;
 
 			}else{
 				if ( block ) {

@@ -51,7 +51,6 @@ public class ContextDiffBlock extends DiffBlockBase{
 					return DiffBlockState.EOB; // end of block
 				}else{
 					block = true;
-					return DiffBlockState.SOE;
 				}
 
 			}else if ( line.indexOf("*** ") == 0 ){
@@ -71,6 +70,11 @@ public class ContextDiffBlock extends DiffBlockBase{
 				if ( block == false ){
 					// set filename
 					rightNameField = getNameField(line);
+					// Print right name if left is /dev/null
+					if (getFullPathName(leftNameField).equals("/dev/null")) {
+						System.out.println(getFileName(rightNameField));
+					}
+					return DiffBlockState.SOE;
 				}else{
 					status = RIGHT;
 					addLine(rightBlock,line);
@@ -83,6 +87,10 @@ public class ContextDiffBlock extends DiffBlockBase{
 				}else if ( status == RIGHT ){
 					addLine(rightBlock,line);
 				}
+
+			}else if ( ch == '\\' ) {
+				// Skip lines like "\ No newline at end of file"
+				continue;
 
 			}else{
 				// block end

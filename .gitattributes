@@ -1,0 +1,22 @@
+# Normalize all text files
+* text=auto
+
+# Explicitly set line endings for common file types
+*.java     text
+*.xml      text
+*.properties text
+*.md       text
+*.txt      text
+*.yml      text
+*.yaml     text
+*.sh       text eol=lf
+*.cmd      text eol=crlf
+*.bat      text eol=crlf
+
+# Binary files should not be normalized
+*.jar      binary
+*.war      binary
+*.zip      binary
+*.tar.gz   binary
+*.rar      binary
+*.class    binary

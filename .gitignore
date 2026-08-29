@@ -19,12 +19,15 @@
 *.tar.gz
 *.rar
 
+# EXCEPT: Track diff2xls JAR files everywhere
+!**/diff2xls*.jar
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
 
 target/
-# Track JAR and WAR files in target/
-!target/*.jar
-!target/*.war
-!target/*.ear
+# Compiled classes are tracked
+!target/classes/
+
+tmp/

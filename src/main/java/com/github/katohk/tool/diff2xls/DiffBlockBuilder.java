@@ -5,6 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+
+import com.github.katohk.tool.diff2xls.difffile.DiffSource;
+import com.github.katohk.tool.diff2xls.difffile.ReaderInputStream;
 
 /**
  * DiffBlockBuilder.java
@@ -28,6 +32,8 @@ public class DiffBlockBuilder {
 
     private int mode = 3;
     private int format = 0;
+    
+    private DiffSource diffSource = null;  // New: support direct file/directory comparison
 
 
     public DiffBlockBuilder() {
@@ -103,22 +109,37 @@ public class DiffBlockBuilder {
 	public void setFormat(int format) {
 		this.format = format;
 	}
+	
+	/**
+	 * Set direct file comparison source.
+	 * When used, the builder will generate diff from direct file comparison
+	 * instead of reading pre-generated diff from input.
+	 * 
+	 * @param diffSource the DiffSource providing the diff
+	 */
+	public void setDiffSource(DiffSource diffSource) {
+		this.diffSource = diffSource;
+	}
 
 	public DiffBlockProcess getDiffBlock() throws IOException {
-
-        if ( fileNameIn != null && streamIn == null ){
+        if (diffSource != null) {
+            // Use DiffSource to generate diff content
+            streamIn = new java.io.BufferedInputStream(
+                new ReaderInputStream(diffSource.getDiffReader(), Charset.forName(enc))
+            );
+        } else if (fileNameIn != null && streamIn == null) {
             streamIn = new FileInputStream(fileNameIn);
         }
 
-        if ( streamIn == null ){
-            streamIn = System.in; 
+        if (streamIn == null) {
+            streamIn = System.in;
         }
 
-        if ( fileNameOt != null && streamOt == null ){
+        if (fileNameOt != null && streamOt == null) {
             streamOt = new FileOutputStream(fileNameOt);
         }
-        
-        if ( streamOt == null ){
+
+        if (streamOt == null) {
             streamOt = System.out;
         }
 

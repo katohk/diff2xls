@@ -1,41 +1,78 @@
 # Diff2xls
 
-Diff2xlsは、diff形式のファイルをExcelファイルに変換するツールです。実行形式jarなので、java -jar コマンドで起動することができます。
+Diff2xls は、diff 出力・ファイル比較・ディレクトリ比較を Excel に変換するツールです。
+`java -jar` で実行できます。
 
-## コマンドラインパラメータ
+## 機能
 
-Diff2xlsを実行する際に、以下のパラメータを指定することができます。
+- 既存の diff ファイル (`-i file.diff`) を Excel に変換
+- diff を事前生成せずに 2 つのファイルを直接比較
+- 2 つのディレクトリを再帰的に比較して差分を出力
+- unified diff (`-u`) と context diff (`-c`) の両方に対応
 
-Usage: Diff2xls template [-cu -i file.diff -o file.xlsx -e encode]
+## コマンドライン使用方法
 
+Usage:
 
-- `template`: Excelのテンプレートファイルのパスを指定します。
-- `-c` : context diff フォーマットを使用。
-- `-u` : unified diff フォーマットを使用。
-- `-i file.diff`: Excel化したいdiffファイルのパスを指定します。
-- `-o file.xlsx`: 出力するExcelファイルのパスを指定します。
-- `-e encode`: diffファイルの文字コードを指定します。デフォルトはUTF-8です。
+```bash
+Diff2xls template [-u|-c] [-i file.diff] [-o file.xlsx] [-e encode]
+Diff2xls template [-u|-c] --file1 path1 --file2 path2 [-o file.xlsx]
+Diff2xls template [-u|-c] --dir1 path1 --dir2 path2 [-o file.xlsx]
+Diff2xls template [-u|-c] file1 file2 [-o file.xlsx]
+```
 
-## 使用方法
+オプション:
 
-以下の手順でDiff2xlsを使用することができます。
+- `template`: Excel テンプレートのパスを指定します。
+- `-u`: unified diff 形式を使用します。デフォルトです。
+- `-c`: context diff 形式を使用します。
+- `-i file.diff`: Excel 化する diff ファイルのパスを指定します。
+- `--file1 path1`: 比較元のファイルを指定します。
+- `--file2 path2`: 比較先のファイルを指定します。
+- `--dir1 path1`: 比較元のディレクトリを指定します。
+- `--dir2 path2`: 比較先のディレクトリを指定します。
+- `-o file.xlsx`: 出力する Excel ファイルのパスを指定します。
+- `-e encode`: 入力テキストの文字コードを指定します。デフォルトは `UTF-8` です。
 
-1. Diff2xlsをダウンロードして、任意のディレクトリに配置します。
-2. コマンドラインから、以下のコマンドを実行します。
+## 使用例
 
-   java -jar Diff2xls.jar template -i file.diff -o file.xlsx -e encode
+### 1. diff ファイルを変換する
 
-3. 出力されたExcelファイルを開いて、差分内容を確認することができます。
+```bash
+java -jar Diff2xls.jar template -u -i changes.diff -o result.xlsx
+```
+
+### 2. 2 つのファイルを直接比較する
+
+```bash
+java -jar Diff2xls.jar template -u --file1 before.txt --file2 after.txt -o result.xlsx
+```
+
+### 3. 2 つのディレクトリを直接比較する
+
+```bash
+java -jar Diff2xls.jar template -c --dir1 old_dir --dir2 new_dir -o result.xlsx
+```
+
+### 4. 位置引数で指定する
+
+```bash
+java -jar Diff2xls.jar template before.txt after.txt -o result.xlsx
+```
 
 ## テンプレート
-Excelのテンプレートには以下のキーワードを設定します。
 
-- `%top` :　先頭行のスタイル 、`#seq`がシーケンス番号、`#left`が修正前、`#right`が修正後
-- `%middle` : 中間行のスタイル
-- `%bottom` : 最終行のスタイル
-- `%attrib` : diff のスタイルを `#!` `#-` `#+` で設定
+Excel のテンプレートには以下のキーワードを設定します。
+
+- `%top`: 先頭行のスタイルです。`#seq` はシーケンス番号、`#left` は修正前、`#right` は修正後を表します。
+- `%middle`: 中間行のスタイルです。
+- `%bottom`: 最終行のスタイルです。
+- `%attrib`: diff のスタイルを `#!` `#-` `#+` で設定します。
 
 ## 注意事項
 
-- Excelのシート名にファイル名を設定しますが、シート名の長さに制限があります。
+- 従来の `-i file.diff` による diff ファイル入力は引き続きサポートされています。
+- ファイル比較やディレクトリ比較は入力ファイルからその場で差分を生成します。
+- Excel のシート名はファイル名から自動設定されますが、長さには制限があります。
+- ディレクトリ比較では、新規追加・削除ファイルが合成 diff として出力され、バイナリファイルはスキップされます。
 

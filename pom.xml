@@ -30,6 +30,12 @@
 			<version>5.10.0</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- java-diff-utils for diff computation -->
+		<dependency>
+			<groupId>io.github.java-diff-utils</groupId>
+			<artifactId>java-diff-utils</artifactId>
+			<version>4.17</version>
+		</dependency>
 	</dependencies>
 	<build>
 	 <plugins>

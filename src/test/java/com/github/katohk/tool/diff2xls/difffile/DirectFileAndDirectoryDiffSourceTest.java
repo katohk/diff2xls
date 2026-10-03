@@ -3,6 +3,7 @@ package com.github.katohk.tool.diff2xls.difffile;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,6 +54,26 @@ public class DirectFileAndDirectoryDiffSourceTest {
         assertTrue(output.contains("keep.txt") || output.contains("add.txt") || output.contains("delete.txt"));
         assertTrue(output.contains("add.txt"));
         assertTrue(output.contains("delete.txt"));
+    }
+
+    @Test
+    void directoryComparisonHandlesMixedUtf8AndShiftJisFiles() throws IOException {
+        Path tempDir = Files.createTempDirectory("diff2xls-mixed-encoding");
+        Path leftDir = tempDir.resolve("left");
+        Path rightDir = tempDir.resolve("right");
+        Files.createDirectories(leftDir);
+        Files.createDirectories(rightDir);
+
+        Files.writeString(leftDir.resolve("mixed.txt"), "hello\n東京\n", StandardCharsets.UTF_8);
+        Files.writeString(rightDir.resolve("mixed.txt"), "hello\n大阪\n", Charset.forName("Shift_JIS"));
+
+        DirectoryDiffSource diffSource = new DirectoryDiffSource(
+                leftDir.toFile(), rightDir.toFile(), StandardCharsets.UTF_8, false);
+
+        String output = readAll(diffSource);
+
+        assertTrue(output.contains("@@"));
+        assertTrue(output.contains("東京") || output.contains("大阪"));
     }
 
     private String readAll(DiffSource diffSource) throws IOException {

@@ -108,17 +108,19 @@ public class DirectoryDiffSource implements DiffSource {
      * Generate diff for a single file pair using DirectFileDiffSource.
      */
     private void generateFileDiff(File leftFile, File rightFile, String relativePath) throws IOException {
-        List<String> leftLines = Files.readAllLines(leftFile.toPath(), encoding);
-        List<String> rightLines = Files.readAllLines(rightFile.toPath(), encoding);
+        Charset leftEncoding = DirectFileDiffSource.detectEncodingForFile(leftFile, encoding);
+        Charset rightEncoding = DirectFileDiffSource.detectEncodingForFile(rightFile, encoding);
+        List<String> leftLines = Files.readAllLines(leftFile.toPath(), leftEncoding);
+        List<String> rightLines = Files.readAllLines(rightFile.toPath(), rightEncoding);
         
         // Skip if files are identical
         if (leftLines.equals(rightLines)) {
             return;
         }
         
-        // Create DirectFileDiffSource to handle the comparison
+        // Use the already-read lines to avoid re-decoding and corrupting mixed-encoding files.
         DirectFileDiffSource fileDiffSource = new DirectFileDiffSource(
-            leftFile, rightFile, encoding, isContext);
+            leftFile, rightFile, leftEncoding, isContext, leftLines, rightLines);
         
         try (BufferedReader diffReader = fileDiffSource.getDiffReader()) {
             String line;
@@ -132,7 +134,8 @@ public class DirectoryDiffSource implements DiffSource {
      * Generate synthetic diff for a new file (all lines marked as added).
      */
     private void generateNewFileDiff(File newFile, String relativePath) throws IOException {
-        List<String> lines = Files.readAllLines(newFile.toPath(), encoding);
+        Charset effectiveEncoding = DirectFileDiffSource.detectEncodingForFile(newFile, encoding);
+        List<String> lines = Files.readAllLines(newFile.toPath(), effectiveEncoding);
         
         diffContent.append("--- /dev/null\n");
         diffContent.append("+++ b/").append(normalizeFileName(relativePath)).append("\n");
@@ -148,7 +151,8 @@ public class DirectoryDiffSource implements DiffSource {
      * Generate synthetic diff for a deleted file (all lines marked as removed).
      */
     private void generateDeletedFileDiff(File deletedFile, String relativePath) throws IOException {
-        List<String> lines = Files.readAllLines(deletedFile.toPath(), encoding);
+        Charset effectiveEncoding = DirectFileDiffSource.detectEncodingForFile(deletedFile, encoding);
+        List<String> lines = Files.readAllLines(deletedFile.toPath(), effectiveEncoding);
         
         diffContent.append("--- a/").append(normalizeFileName(relativePath)).append("\n");
         diffContent.append("+++ /dev/null\n");
